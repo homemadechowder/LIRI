@@ -117,6 +117,7 @@ function movieSearch(){
     axios.get(queryUrl).then(
         function(response) {
         var movie = response.data;
+            console.log("*********************************************");
             // * Title of the movie.
             console.log("Title: " + movie.Title);
             // * Year the movie came out.
@@ -133,7 +134,7 @@ function movieSearch(){
             console.log("Plot: " + movie.Plot);
             // * Actors in the movie.
             console.log("Actors: " + movie.Actors);
-          
+            console.log("*********************************************");
         
         })
         .catch(function(error) {
