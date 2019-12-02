@@ -4,6 +4,7 @@ var Spotify = require('node-spotify-api');
 var moment = require('moment');
 var keys = require("./keys.js");
 var axios = require("axios");
+var fs = require("fs");
 
 moment().format();
 
@@ -31,7 +32,7 @@ for (i = 3; i < process.argv.length; i++) {
 
 readInputs();
 //Function that reads the inputs
-function readInputs(){
+function readInputs(x){
 
     switch (process.argv[2]){
         case "concert-this":
@@ -44,6 +45,7 @@ function readInputs(){
             movieSearch();
             break;
         case "do-what-it-says":
+            doIt();
             break;
         default:
     }
@@ -56,7 +58,10 @@ function bands(){
     function(response) {
 
     console.log("Search results for " + print +": ");
-    
+    if (inputs == ''){
+        console.log("empty");
+        inputs = "rex+orange+county";
+    }   
     //Print out each result
     for (i = 0; i < response.data.length; i++){
         console.log("*********************************************");
@@ -73,7 +78,9 @@ function bands(){
 }
 
 function spotifySearch(){
-    
+    if (inputs == ''){
+        inputs = "the+sign";
+    }   
     
     spotify.search({ type: 'track', query: inputs }, function(err, data) {
         if (err) {
@@ -98,13 +105,18 @@ function spotifySearch(){
 }
 
 function movieSearch(){
-    var queryUrl = "http://www.omdbapi.com/?t=" + inputs + "&y=&plot=short&apikey=trilogy";
-
+    var queryUrl = "";
+    
+    
+    if (inputs == ''){
+        inputs = "mr+nobody";
+    }   
+    queryUrl = "http://www.omdbapi.com/?t=" + inputs + "&y=&plot=short&apikey=trilogy";
+    
+    console.log(queryUrl);
     axios.get(queryUrl).then(
         function(response) {
         var movie = response.data;
-            
-        for (i = 0; i < movie.length; i++){
             // * Title of the movie.
             console.log("Title: " + movie.Title);
             // * Year the movie came out.
@@ -116,13 +128,13 @@ function movieSearch(){
             // * Country where the movie was produced.
             console.log("Country of Production: " + movie.Country);
             // * Language of the movie.
-            console.log
+            console.log("Language of movie: English");
             // * Plot of the movie.
             console.log("Plot: " + movie.Plot);
             // * Actors in the movie.
             console.log("Actors: " + movie.Actors);
           
-        }
+        
         })
         .catch(function(error) {
           if (error.response) {
@@ -144,4 +156,49 @@ function movieSearch(){
           }
           console.log(error.config);
         });
+}
+
+function doIt(){
+    // fs is a core Node package for reading and writing files
+
+
+// This block of code will read from the "movies.txt" file.
+// It's important to include the "utf8" parameter or the code will provide stream data (garbage)
+// The code will store the contents of the reading inside the variable "data"
+fs.readFile("random.txt", "utf8", function(error, data) {
+
+  // If the code experiences any errors it will log the error to the console.
+  if (error) {
+    return console.log(error);
+  }
+
+  // We will then print the contents of data
+  console.log(data);
+
+  // Then split it by commas (to make it more readable)
+  
+  var dataArr = data.split(",");
+
+  // We will then re-display the content as an array for later use.
+  switch (dataArr[0]){
+    case "concert-this":
+        inputs = dataArr[1];
+        bands();
+        break;
+    case "spotify-this-song":
+        inputs = dataArr[1];
+        spotifySearch();
+        break;
+    case "movie-this":
+        inputs = dataArr[1];    
+        movieSearch();
+        break;
+    case "do-what-it-says":
+        doIt();
+        break;
+    default:
+}
+
+});
+
 }
